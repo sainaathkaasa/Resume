@@ -11,6 +11,6 @@ public interface SkillsMapper {
     // Single
     Skills toEntity(SkillsRequest request);
 
-    // 🔥 Bulk (THIS IS THE KEY)
+    // Bulk (THIS IS THE KEY)
     List<Skills> toEntityList(List<SkillsRequest> requests);
 }

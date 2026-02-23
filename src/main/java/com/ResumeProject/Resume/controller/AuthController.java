@@ -2,6 +2,8 @@ package com.ResumeProject.Resume.controller;
 
 import com.ResumeProject.Resume.config.JwtUtil;
 import com.ResumeProject.Resume.entity.AuthRequest;
+import com.ResumeProject.Resume.exception.ResourceNotFoundException;
+import com.ResumeProject.Resume.exception.UnauthorizedException;
 import com.ResumeProject.Resume.service.CustomUserDetailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -12,6 +14,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 public class AuthController {
@@ -28,18 +33,26 @@ public class AuthController {
     @PostMapping("/authenticate")
     public ResponseEntity<?> authenticate(@RequestBody AuthRequest request) {
 
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        request.getUsername(),
-                        request.getPassword()
-                )
-        );
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            request.getUsername(),
+                            request.getPassword()
+                    )
+            );
+        }catch (Exception ex){
+            throw new UnauthorizedException("Invalid username or password");
+        }
 
         UserDetails user = userDetailsService
                 .loadUserByUsername(request.getUsername());
 
         String token = jwtUtil.generateToken(user);
 
-        return ResponseEntity.ok(token);
+        Map<String, Object> response = new HashMap<>();
+        response.put("message", "Successfully logged in");
+        response.put("token", token);
+
+        return ResponseEntity.ok(response);
     }
 }
